@@ -18,10 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 public class ProductRestControllerMvcTest {
 
-    private static final int PRODUCT_ID = 1;
+    private static final long PRODUCT_ID = 1;
     private static final String PRODUCT_NAME = "MacBook";
     private static final String PRODUCT_DESCRIPTION = "Awesome!";
     private static final int PRODUCT_PRICE = 1000;
@@ -55,9 +53,6 @@ public class ProductRestControllerMvcTest {
 
         mockMvc.perform(get(PRODUCTS_URL).contextPath(CONTEXT_URL)).andExpect(status().isOk())
                 .andExpect(content().json(objectWriter.writeValueAsString(products)));
-
-
-
     }
 
     @Test
@@ -66,12 +61,27 @@ public class ProductRestControllerMvcTest {
         when(repository.save(any())).thenReturn(product);
         ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-
         mockMvc.perform(post(PRODUCTS_URL).contextPath(CONTEXT_URL).contentType(MediaType.APPLICATION_JSON)
                 .content(objectWriter.writeValueAsString(product))).andExpect(status().isOk()).andExpect(content()
                 .json(objectWriter.writeValueAsString(product)));
+    }
 
+    @Test
+    public void testUpdateProduct() throws Exception {
+        Product product = buildProduct();
+        product.setPrice(1200);
+        when(repository.save(any())).thenReturn(product);
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
+        mockMvc.perform(put(PRODUCTS_URL).contextPath(CONTEXT_URL).contentType(MediaType.APPLICATION_JSON)
+                .content(objectWriter.writeValueAsString(product))).andExpect(status().isOk()).andExpect(content()
+                .json(objectWriter.writeValueAsString(product)));
+    }
+
+    @Test
+    public void deleteProduct() throws Exception {
+        doNothing().when(repository).deleteById(PRODUCT_ID);
+        mockMvc.perform(delete(PRODUCTS_URL+PRODUCT_ID).contextPath(CONTEXT_URL)).andExpect(status().isOk());
     }
 
     private Product buildProduct() {
