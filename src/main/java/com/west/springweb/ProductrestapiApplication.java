@@ -10,6 +10,11 @@ public class ProductrestapiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProductrestapiApplication.class, args);
+		System.getenv().forEach((k, v) -> {
+			System.out.println(k + ":" + v);
+		});
+
+		System.out.println(System.getenv("TEST"));
 	}
 
 }
